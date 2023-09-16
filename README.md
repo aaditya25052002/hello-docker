@@ -59,53 +59,51 @@ CMD ["node", "app.js"]
 
 This Dockerfile tells Docker how to build our container image. It uses the official Node.js image, sets the working directory, installs dependencies, exposes port 80, and specifies the command to run our app.
 
-## Step 3: Build and Run the Docker Container
+## Step 3: Build and Push the Docker Image to Azure Container Registry (ACR)
 
-Now, let's build and run our Docker container locally:
+Now, let's build and push our Docker container image to Azure Container Registry:
 
-```bash
-# Build the Docker image (don't forget the dot at the end)
-docker build -t hello-docker .
+1. **Create an Azure Container Registry (ACR)**:
 
-# Run the Docker container
-docker run -p 80:80 hello-docker
-```
+   - Go to your Azure portal.
+   - Click on "Create a resource" and search for "Container Registry." Click on it.
+   - Fill in the necessary details to create your registry.
 
-Your app should now be running locally in a Docker container.
+2. **Build and Push the Docker Image**:
 
-## Step 4: Deploy to Microsoft Azure
+   ```bash
+   # Sign in to your Azure account
+   az login
 
-Now, let's deploy our Docker container to Microsoft Azure:
+   # Set the name of your ACR (replace 'your-acr-name' with your registry's name)
+   ACR_NAME=your-acr-name
 
-1. Sign in to your [Azure portal](https://portal.azure.com/).
+   # Log in to your ACR
+   az acr login --name $ACR_NAME
 
-2. Click on "Create a resource" and search for "Container Instances." Click on it.
+   # Build the Docker image (don't forget the dot at the end)
+   docker build -t $ACR_NAME.azurecr.io/hello-docker .
 
-3. Fill in the necessary details:
-   - **Subscription**: Choose your subscription.
-   - **Resource group**: Create a new or select an existing one.
-   - **Container name**: Give your container a unique name.
-   - **Region**: Choose a region.
-   - **Image Source**: Docker Hub.
-   - **Image and tag**: Enter the name of your Docker image (e.g., `hello-docker`) and tag (e.g., `latest`).
+   # Push the Docker image to ACR
+   docker push $ACR_NAME.azurecr.io/hello-docker
+   ```
 
-4. Click "Next" to review and create the container instance. Once created, you'll see a public IP address associated with your container instance.
+## Step 4: Create an Azure Web App and Deploy the Docker Container
 
-## Step 5: Implement CI/CD in Azure
+Now, let's create an Azure Web App and deploy our Docker container:
 
-Now, let's set up CI/CD in Azure to automatically deploy changes to our app:
+1. **Create an Azure Web App**:
 
-1. Go to your Azure DevOps organization or create one if you don't have it.
+   - Go to your Azure portal.
+   - Click on "Create a resource" and search for "Web App." Click on it.
+   - Fill in the necessary details, and under "Container," select "Docker Container." Choose your ACR and image (e.g., `hello-docker`).
 
-2. Create a new project and navigate to "Pipelines."
+2. **Configure Continuous Deployment**:
 
-3. Click on "New pipeline" and follow the steps to connect your code repository (e.g., GitHub, Azure Repos, Bitbucket).
+   - In the Azure Web App, go to "Deployment Center."
+   - Choose your source control provider (e.g., GitHub, Azure Repos) and follow the prompts to set up CI/CD using webhooks.
 
-4. Choose your repository and configure the pipeline. You can use a starter pipeline or create one from scratch. Make sure to specify that you want to deploy to Azure Container Instances.
-
-5. Trigger your pipeline manually or set up automatic triggers on code changes.
-
-## Step 6: Modify Your App (CI/CD Test)
+## Step 5: Modify Your App (CI/CD Test)
 
 Finally, let's make a change to our app and test the CI/CD pipeline:
 
@@ -117,8 +115,8 @@ Finally, let's make a change to our app and test the CI/CD pipeline:
 
 2. Commit and push this change to your code repository.
 
-3. Watch your Azure DevOps pipeline automatically build and deploy the updated Docker container to Azure Container Instances.
+3. Watch your Azure DevOps pipeline automatically build and deploy the updated Docker container to Azure Web App.
 
-And there you have it! You've successfully Dockerized a Node.js app, deployed it to Microsoft Azure, and set up CI/CD to automate deployments. Keep making changes to your app and enjoy watching the CI/CD magic in action!
+And there you have it! You've successfully Dockerized a Node.js app, deployed it to Azure using Azure Container Registry, and set up CI/CD with webhooks for automatic deployments. Keep making changes to your app and enjoy watching the CI/CD magic in action!
 
 Feel free to reach out if you have any questions. Happy coding! 🚀
